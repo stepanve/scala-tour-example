@@ -7,28 +7,45 @@ object ScalaTour {
     object Polygon {
         // 与えられる`edges`の辺に応じて
         // 適切な多角形を生成する静的なファクトリメソッド
-        def fromEdges(edges: List[Int]): Polygon =
+        // 返り血を `Option[Polygon]` 型に変更
+        def fromEdges(edges: List[Int]): Option[Polygon] =
         edges.length match {
             case 3 =>
-            new Triangle(edges)
+                // 三角形は実装されているので `Some[Polygon]` で返す
+                Some(new Triangle(edges))
             case x =>
-            ??? // TODO none
+                None
         } 
     }
 
     val edges3 = List(3, 4, 5)
     val polygon3 = Polygon.fromEdges(edges3);
-    println(s"辺の数: ${polygon3.n}, 面積: ${polygon3.area}")
+    polygon3 match {
+        case Some(p) => println(p.area)
+        case None =>
+            println("不正な辺が与えられたため面積は出力できません")
+    }
+    polygon3.foreach(p => println(p.area))
 
-    val edges2 = List(3, 4)
-    // val polygon2 = Polygon.fromEdges(edges2);
-    // println(s"辺の数: ${polygon2.n}, 面積: ${polygon2.area}")
+    polygon3
+        .map(p => p.area * 2)
+        .foreach(area => println(area))
 
-    val blueFrostedEdges3 = List(3, 4, 5)
-    val BlueFrostedTraiangle = new BlueFrostedTraiangle(blueFrostedEdges3)
-    BlueFrostedTraiangle.printColor()
 
-    println(BlueFrostedTraiangle.alpha)
+    val invalidEdges2 = List(3, 4)
+    val invalidPolygon2 = Polygon.fromEdges(invalidEdges2)
+
+    invalidPolygon2 match {
+        case Some(p) => println(p.area)
+        case None =>
+            println("不正な辺が与えられたため面積は出力できません")
+    }
+
+    invalidPolygon2.foreach(p => println(p.area))
+
+    invalidPolygon2
+        .map(p => p.area * 2)
+        .foreach(area => println(area))
   }
 }
 
