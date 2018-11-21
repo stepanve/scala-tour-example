@@ -3,50 +3,76 @@ package example
 object ScalaTour {
     def main(args: Array[String]): Unit = {
 
-    // 静的メソッドとして利用できる
-    object Polygon {
-        // 与えられる`edges`の辺に応じて
-        // 適切な多角形を生成する静的なファクトリメソッド
-        // 返り血を `Option[Polygon]` 型に変更
-        def fromEdges(edges: List[Int]): Option[Polygon] =
-        edges.length match {
-            case 3 =>
-                // 三角形は実装されているので `Some[Polygon]` で返す
+        object Triangle {
+            // 辺の数だけではなく、図形が成立するかどうかもチェックするファクトリメソッド
+            def fromEdges(edges: List[Int]): Option[Triangle] =
+            if (edges.length == 3
+                && edges(0) + edges(1) > edges(2)
+                && edges(1) + edges(2) > edges(0)
+                && edges(2) + edges(0) > edges(1))
                 Some(new Triangle(edges))
-            case x =>
-                None
-        } 
+            else
+                None 
+        }
+
+        // プライベートコンストラクタに変更することで、
+        // インスタンス作成を `Triangle.fromEdges` 経由に制限
+        class Triangle private (edges: List[Int]) extends Polygon(edges) {
+            // 与えられた辺から三角形が成立すると勝手に仮定
+            val a = edges(0)
+            val b = edges(1)
+            val c = edges(2)
+
+            val area = {
+                // Heron's formula
+                val s = (a + b + c) / 2.0
+                math.sqrt(s * (s - a) * (s - b) * (s - c))
+            }
+        }
+
+        // 静的メソッドとして利用できる
+        object Polygon {
+            // 与えられる`edges`の辺に応じて
+            // 適切な多角形を生成する静的なファクトリメソッド
+            // 返り血を `Option[Polygon]` 型に変更
+            def fromEdges(edges: List[Int]): Option[Polygon] =
+            edges.length match {
+                case 3 => Triangle.fromEdges(edges)
+                case x => None
+            } 
+        }
+
+        val edges3 = List(3, 4, 5)
+        val polygon3 = Polygon.fromEdges(edges3);
+        polygon3 match {
+            case Some(p) => println(p.area)
+            case None =>
+                println("不正な辺が与えられたため面積は出力できません")
+        }
+        polygon3.foreach(p => println(p.area))
+
+        polygon3
+            .map(p => p.area * 2)
+            .foreach(area => println(area))
+
+
+        val invalidEdges2 = List(3, 4)
+        val invalidPolygon2 = Polygon.fromEdges(invalidEdges2)
+
+        invalidPolygon2 match {
+            case Some(p) => println(p.area)
+            case None =>
+                println("不正な辺が与えられたため面積は出力できません")
+        }
+
+        // not display
+        invalidPolygon2.foreach(p => println(p.area))
+
+        // not display
+        invalidPolygon2
+            .map(p => p.area * 2)
+            .foreach(area => println(area))
     }
-
-    val edges3 = List(3, 4, 5)
-    val polygon3 = Polygon.fromEdges(edges3);
-    polygon3 match {
-        case Some(p) => println(p.area)
-        case None =>
-            println("不正な辺が与えられたため面積は出力できません")
-    }
-    polygon3.foreach(p => println(p.area))
-
-    polygon3
-        .map(p => p.area * 2)
-        .foreach(area => println(area))
-
-
-    val invalidEdges2 = List(3, 4)
-    val invalidPolygon2 = Polygon.fromEdges(invalidEdges2)
-
-    invalidPolygon2 match {
-        case Some(p) => println(p.area)
-        case None =>
-            println("不正な辺が与えられたため面積は出力できません")
-    }
-
-    invalidPolygon2.foreach(p => println(p.area))
-
-    invalidPolygon2
-        .map(p => p.area * 2)
-        .foreach(area => println(area))
-  }
 }
 
 abstract class Polygon(edges: List[Int]) {
@@ -96,19 +122,5 @@ class BlueFrostedTraiangle(edges: List[Int])
         // Hero's formula
         val s = (a + b + c) / 2.0
         math.sqrt(s * (s - a) * (a - b) * (s - c))
-    }
-}
-
-
-class Triangle(edges: List[Int]) extends Polygon(edges) {
-    // 与えられた辺から三角形が成立すると勝手に仮定
-    val a = edges(0)
-    val b = edges(1)
-    val c = edges(2)
-
-    val area = {
-        // Heron's formula
-        val s = (a + b + c) / 2.0
-        math.sqrt(s * (s - a) * (s - b) * (s - c))
     }
 }
