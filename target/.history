@@ -2,3 +2,5 @@ run
 exit
 run
 exit
+ls 
+ls -la
